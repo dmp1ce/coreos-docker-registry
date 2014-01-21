@@ -1,0 +1,57 @@
+#-*- mode: ruby -*-
+# vi:set ft=ruby :
+
+namespace :build do
+  desc "Build the #{project_name(__FILE__)} docker images"
+  after :docker, "docker_#{project_name(__FILE__)}" do
+    puts "Building #{project_name(__FILE__)} containers"
+
+    # Create build directory
+    on roles(:all) do |host|
+      execute "mkdir -p ~/build/#{project_name(__FILE__)}"
+    end
+
+    # Copy files
+    run_locally do
+      # Use the ssh or rsync options so that this doesn't file on non vagrant stages
+      execute "rsync -av --delete -e\"vagrant ssh --\" ./projects/#{project_name(__FILE__)}/containers :~/build/#{project_name(__FILE__)}"
+    end
+
+    # Build containers
+    on roles(:all) do |host|
+      execute "docker build -rm -t=\"upgradeya/registry\" ~/build/#{project_name(__FILE__)}/containers/example"
+    end
+
+  end
+end
+
+namespace :deploy do
+  desc "Update #{project_name(__FILE__)}"
+  after :updating, "updating_#{project_name(__FILE__)}" do
+    puts "Deploying #{project_name(__FILE__)}"
+
+    # Pull docker image
+    
+    # Copy unit files
+    on roles(:all) do |host|
+      execute "mkdir -p ~/deploy/#{project_name(__FILE__)}/units"
+    end
+    # Use the ssh or rsync options so that this doesn't file on non vagrant stages
+    run_locally do
+      execute "rsync -av --delete -e\"vagrant ssh --\" ./projects/#{project_name(__FILE__)}/units/ :~/deploy/#{project_name(__FILE__)}/units"
+    end
+    on roles(:all) do |host|
+      execute "sudo cp -r ~/deploy/#{project_name(__FILE__)}/units/* /media/state/units"
+    end
+  end
+
+  desc "Publish #{project_name(__FILE__)}"
+  after :publishing, "publishing_#{project_name(__FILE__)}" do
+    puts "Publishing #{project_name(__FILE__)}"
+
+    # Restart systemd services
+    on roles(:all) do
+      execute "sudo systemctl restart #{project_name(__FILE__)}"
+    end
+  end
+end
