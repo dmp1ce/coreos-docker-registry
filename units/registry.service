@@ -1,0 +1,11 @@
+[Unit]
+Description=UpgradeYa Docker registry
+Requires=network.target
+After=docker.service
+
+[Service]
+Restart=always
+ExecStart=%current_project_path%/deploy/scripts/start_registry.sh
+
+[Install]
+WantedBy=local.target
