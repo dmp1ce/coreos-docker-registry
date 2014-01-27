@@ -6,6 +6,7 @@ After=docker.service
 [Service]
 Restart=always
 ExecStart=%current_project_path%/deploy/scripts/start_registry.sh
+ExecStop=%current_project_path%/deploy/scripts/stop_registry.sh
 
 [Install]
 WantedBy=local.target

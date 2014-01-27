@@ -1,6 +1,9 @@
 #-*- mode: ruby -*-
 # vi:set ft=ruby :
 
+# Set the namespace for other projects to find this one
+set :registry_namespace, project_name(__FILE__)
+
 namespace :build do
   desc "Build the #{project_name(__FILE__)} docker images"
   after :docker, "docker_#{project_name(__FILE__)}" do
@@ -40,9 +43,11 @@ namespace :deploy do
 
     # Pull docker image
     
-    # Copy unit files
+    # Create required paths
     on roles(:all) do |host|
       execute "mkdir -p #{current_project_path(__FILE__)}/deploy/units"
+      execute "mkdir -p #{current_project_path(__FILE__)}/deploy/scripts"
+      execute "mkdir -p #{current_project_path(__FILE__)}/shared"
     end
     # Use the ssh or rsync options so that this doesn't file on non vagrant stages
     run_locally do
@@ -57,6 +62,8 @@ namespace :deploy do
       # Convert placeholder variables
       execute "sudo sed -i 's&%current_project_path%&#{current_project_path(__FILE__)}&g' /media/state/units/registry.service"
       execute "sudo sed -i 's&%shared_project_path%&#{shared_path(__FILE__)}&g' #{current_project_path(__FILE__)}/deploy/scripts/start_registry.sh"
+      execute "sudo sed -i 's&%project_name%&#{project_name(__FILE__)}&g' #{current_project_path(__FILE__)}/deploy/scripts/start_registry.sh"
+      execute "sudo sed -i 's&%project_name%&#{project_name(__FILE__)}&g' #{current_project_path(__FILE__)}/deploy/scripts/stop_registry.sh"
     end
   end
 
