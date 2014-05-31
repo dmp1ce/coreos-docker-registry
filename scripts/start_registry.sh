@@ -14,4 +14,4 @@ NEW_NAME="%project_name%_$RANDOM_CHUNK"
 etcdctl set %project_name%/name $NEW_NAME
 
 # Start registry for systemd
-/usr/bin/docker run -p 5000:5000 --volumes-from=$CONTAINER_NAME -name $NEW_NAME upgradeya/%project_name%
+/usr/bin/docker run --volumes-from=$CONTAINER_NAME -name $NEW_NAME upgradeya/%project_name%

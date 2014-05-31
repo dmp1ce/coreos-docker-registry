@@ -20,6 +20,8 @@ RUN mkdir /data && mv /docker-registry/config/config.yml /data && ln -s /data/co
 # && ln -s /data/config.yml /docker-registry
 VOLUME ["/data"]
 
+EXPOSE 5000
+
 WORKDIR /docker-registry
 #ENTRYPOINT gunicorn --access-logfile - --log-level debug --debug -b 0.0.0.0:5000 -w 1 wsgi:application
 ENTRYPOINT ./run.sh
